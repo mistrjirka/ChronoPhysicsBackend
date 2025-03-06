@@ -58,7 +58,8 @@ ChronoSimulation::Config::Config() :
     soilFriction(30),
     soilJanosi(0.01),
     soilStiffness(2e8),
-    soilDamping(3e4)
+    soilDamping(3e4),
+    corner(ChVector2d(2500, -7500))
 {}
 
 // ChronoSimulation implementation
@@ -71,7 +72,8 @@ void ChronoSimulation::Initialize() {
     
     // Setup terrain
     SetupTerrain();
-    
+
+    SetupSensors();
     // Setup visualization
     SetupVisualization();
     
@@ -85,6 +87,11 @@ void ChronoSimulation::Initialize() {
     // Configure solver
     m_system->SetSolverType(ChSolver::Type::BARZILAIBORWEIN);
     m_system->GetSolver()->AsIterative()->SetMaxIterations(150);
+}
+
+void ChronoSimulation::SetupSensors() {
+    // Create the physical sensors
+    m_sensors = std::make_shared<PhysicalSensors>(m_vehicle.get(), m_terrain_coords.get());
 }
 
 void ChronoSimulation::SetupVehicle() {
@@ -221,6 +228,12 @@ void ChronoSimulation::SetupTerrain() {
     // Set terrain appearance
     m_terrain->GetMesh()->SetTexture(vehicle::GetDataFile("../data/data/vehicle/terrain/textures/grass.jpg"), 200, 200);
     m_terrain->GetMesh()->SetWireframe(m_config.renderWireframe);
+
+    m_terrain_coords = std::make_shared<TerrainSystemCoordinates>(
+        m_config.terrainWidth, 
+        m_config.terrainHeight,
+        m_config.terrainZ,
+        m_config.corner);
 }
 
 void ChronoSimulation::SetupVisualization() {
@@ -271,6 +284,7 @@ void ChronoSimulation::Run() {
         m_terrain->Advance(m_config.stepSize);
         m_vehicle->Advance(m_config.stepSize);
         m_vis->Advance(m_config.stepSize);
+        m_sensors->Update(time);
 
         realtime_timer.Spin(m_config.stepSize);
     }

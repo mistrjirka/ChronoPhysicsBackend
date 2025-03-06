@@ -21,6 +21,8 @@
 #include "chrono/core/ChQuaternion.h"
 #include "chrono/core/ChVector2.h"
 #include "ros_bridge_driver.hpp"
+#include "physical_sensors.hpp"
+#include "terrain_system.hpp"
 
 // Driver class for controlling the vehicle
 class MyDriver : public chrono::vehicle::ChDriver {
@@ -61,6 +63,7 @@ public:
         double terrainWidth;
         double terrainZ;
         double terrainDelta;
+        chrono::ChVector2d corner;
         
         // Visualization parameters
         int targetFps;
@@ -104,6 +107,8 @@ private:
     std::shared_ptr<chrono::vehicle::generic::Generic_Vehicle> m_vehicle;
     std::shared_ptr<chrono::vehicle::SCMTerrain> m_terrain;
     std::shared_ptr<chrono::vehicle::ChWheeledVehicleVisualSystemIrrlicht> m_vis;
+    std::shared_ptr<TerrainSystemCoordinates> m_terrain_coords;
+    std::shared_ptr<PhysicalSensors> m_sensors;
     std::shared_ptr<ROSDriver> m_driver;
     double last_sleep_time;
     double last_render_sleep_time;
@@ -112,6 +117,8 @@ private:
     void SetupVehicle();
     void SetupTerrain();
     void SetupVisualization();
+    void SetupSensors();
+    
     double GetScale();
     double GetSleepTime(bool render);
 

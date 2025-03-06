@@ -1,6 +1,6 @@
 #pragma once
 
-#include "chrono_vehicle/ChVeihcle.h"
+#include "chrono_vehicle/ChVehicle.h"
 #include "ros_bridge.hpp"
 #include "terrain_system.hpp"
 #include <mutex>
