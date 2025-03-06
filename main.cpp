@@ -45,9 +45,9 @@ ChronoSimulation::Config::Config() :
     heightmapFile("../heightmap.bmp"),
     terrainHeight(300),
     terrainWidth(100),
-    terrainHeight0(0),
-    terrainHeight1(2.83),
+    terrainZ(2.83),
     terrainDelta(0.1),
+    targetFps(30),
     soilKphi(2e6),
     soilKc(0),
     soilN(1.1),
@@ -130,6 +130,60 @@ void ChronoSimulation::SetupVehicle() {
     m_vehicle->InitializeTire(tire_RR, m_vehicle->GetAxle(1)->m_wheels[RIGHT], VisualizationType::NONE);
 }
 
+double ChronoSimulation::GetScale() {
+    double scale = m_config.terrainZ;
+    double actual_height = 0.0;
+    double tolerance = 0.01; // 1 cm tolerance
+    int max_iterations = 1;
+    int iteration = 0;
+
+    double min_z = 0.0;
+    double max_z = 0.0;
+    std::shared_ptr<SCMTerrain> TmpTerrain = std::make_shared<SCMTerrain>(m_vehicle->GetSystem());
+    TmpTerrain->SetSoilParameters(
+        m_config.soilKphi,
+        m_config.soilKc,
+        m_config.soilN,
+        m_config.soilCohesion,
+        m_config.soilFriction,
+        m_config.soilJanosi,
+        m_config.soilStiffness,
+        m_config.soilDamping
+    );
+
+    TmpTerrain->Initialize(
+        m_config.heightmapFile, 
+        m_config.terrainHeight, 
+        m_config.terrainWidth, 
+        0, 
+        m_config.terrainZ, 
+        m_config.terrainDelta
+    );
+    
+    auto meshHolder = TmpTerrain->GetMesh();
+    auto mesh = meshHolder->GetMesh();
+    const auto &vertices = mesh->GetCoordsVertices();
+
+    min_z = std::numeric_limits<double>::max();
+    max_z = std::numeric_limits<double>::lowest();
+
+    for (const auto &v : vertices)
+    {
+        if (v.z() < min_z)
+            min_z = v.z();
+        if (v.z() > max_z)
+            max_z = v.z();
+    }
+
+
+    actual_height = max_z - min_z;
+
+
+    double scaling_factor = m_config.terrainZ / actual_height;
+    scale *= scaling_factor;
+    return scale;
+}
+
 void ChronoSimulation::SetupTerrain() {
     // Create terrain
     m_terrain = std::make_shared<SCMTerrain>(m_vehicle->GetSystem());
@@ -148,12 +202,16 @@ void ChronoSimulation::SetupTerrain() {
     
     // Add moving patch and initialize
     m_terrain->AddMovingPatch(m_vehicle->GetChassisBody(), ChVector3d(0, 0, 0), ChVector3d(5, 3, 1));
+
+    double scale = m_config.terrainZ;
+    double actual_height = 0.0;
+
     m_terrain->Initialize(
         m_config.heightmapFile, 
         m_config.terrainHeight, 
         m_config.terrainWidth, 
-        m_config.terrainHeight0, 
-        m_config.terrainHeight1, 
+        m_config.terrainZ, 
+        GetScale(), 
         m_config.terrainDelta
     );
     
@@ -175,6 +233,9 @@ void ChronoSimulation::SetupVisualization() {
 }
 
 void ChronoSimulation::Run() {
+    double render_step_size = 1.0 / m_config.targetFps;
+    double last_render_time = 0.0;
+
     while (m_vis->Run()) {
         double time = m_system->GetChTime();
 
@@ -186,10 +247,13 @@ void ChronoSimulation::Run() {
         m_terrain->Synchronize(time);
         m_vehicle->Synchronize(time, driver_inputs, *m_terrain);
 
-        // Render the scene
-        m_vis->BeginScene();
-        m_vis->Render();
-        m_vis->EndScene();
+        // Render the scene at the specified FPS
+        if (time - last_render_time >= render_step_size) {
+            m_vis->BeginScene();
+            m_vis->Render();
+            m_vis->EndScene();
+            last_render_time = time;
+        }
 
         // Advance simulation
         m_driver->Advance(m_config.stepSize);

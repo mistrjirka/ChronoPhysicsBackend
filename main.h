@@ -58,9 +58,11 @@ public:
         std::string heightmapFile;
         double terrainHeight;
         double terrainWidth;
-        double terrainHeight0;
-        double terrainHeight1;
+        double terrainZ;
         double terrainDelta;
+        
+        // Visualization parameters
+        int targetFps;
         
         // Soil parameters
         double soilKphi;      // Bekker Kphi
@@ -103,6 +105,7 @@ private:
     void SetupVehicle();
     void SetupTerrain();
     void SetupVisualization();
+    double GetScale();
 };
 
 #endif

@@ -13,7 +13,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # 1. Set the project name
 #--------------------------------------------------------------
 
-project(my_project)
+project(ChronoBackend)
 
 #--------------------------------------------------------------
 # 2. Find REQUIRED and OPTIONAL Chrono modules
@@ -109,14 +109,14 @@ add_executable(main ${MY_FILES})
 # path to the Chrono data directory, either in its source tree
 # (if using a build version of Chrono), or in its install tree
 # (if using an installed version of Chrono).
-target_compile_definitions(ChronoBackend PRIVATE "CHRONO_DATA_DIR=\"${CHRONO_DATA_DIR}\"") 
+target_compile_definitions(main PRIVATE "CHRONO_DATA_DIR=\"${CHRONO_DATA_DIR}\"") 
 
 if(MSVC)
-    set_target_properties(ChronoBackend PROPERTIES MSVC_RUNTIME_LIBRARY ${CHRONO_MSVC_RUNTIME_LIBRARY})
+    set_target_properties(main PROPERTIES MSVC_RUNTIME_LIBRARY ${CHRONO_MSVC_RUNTIME_LIBRARY})
 endif()
 
 #--------------------------------------------------------------
 # Link to Chrono targets for the requested modules
 #--------------------------------------------------------------
 
-target_link_libraries(ChronoBackend PRIVATE ${CHRONO_TARGETS})
+target_link_libraries(main PRIVATE ${CHRONO_TARGETS})
