@@ -97,7 +97,7 @@ endif()
 # 3. Specify project sources and add executable
 #--------------------------------------------------------------
 
-set(MY_FILES main.cpp simulation_launcher.cpp)
+set(MY_FILES main.cpp simulation_launcher.cpp ros_bridge_driver.hpp ros_bridge.cpp)
 
 add_executable(main ${MY_FILES})
 

@@ -20,6 +20,7 @@
 #include "chrono/core/ChVector3.h"
 #include "chrono/core/ChQuaternion.h"
 #include "chrono/core/ChVector2.h"
+#include "ros_bridge_driver.hpp"
 
 // Driver class for controlling the vehicle
 class MyDriver : public chrono::vehicle::ChDriver {
@@ -103,7 +104,7 @@ private:
     std::shared_ptr<chrono::vehicle::generic::Generic_Vehicle> m_vehicle;
     std::shared_ptr<chrono::vehicle::SCMTerrain> m_terrain;
     std::shared_ptr<chrono::vehicle::ChWheeledVehicleVisualSystemIrrlicht> m_vis;
-    std::shared_ptr<MyDriver> m_driver;
+    std::shared_ptr<ROSDriver> m_driver;
     double last_sleep_time;
     double last_render_sleep_time;
     

@@ -1,5 +1,8 @@
 #include "main.h"
 #include "simulation_launcher.h"
+#include <chrono>
+#include <thread>
+#include "chrono/core/ChRealtimeStep.h"
 
 using namespace chrono;
 using namespace chrono::vehicle;
@@ -46,7 +49,7 @@ ChronoSimulation::Config::Config() :
     terrainHeight(300),
     terrainWidth(100),
     terrainZ(2.83),
-    terrainDelta(0.25),
+    terrainDelta(0.1),
     targetFps(30),
     soilKphi(2e6),
     soilKc(0),
@@ -60,7 +63,6 @@ ChronoSimulation::Config::Config() :
 
 // ChronoSimulation implementation
 ChronoSimulation::ChronoSimulation(const Config& config) : m_config(config), m_system(nullptr) {
-    
 }
 
 void ChronoSimulation::Initialize() {
@@ -74,7 +76,7 @@ void ChronoSimulation::Initialize() {
     SetupVisualization();
     
     // Create driver
-    m_driver = std::make_shared<MyDriver>(*m_vehicle, m_config.driverDelay);
+    m_driver = std::make_shared<ROSDriver>(*m_vehicle);
     m_driver->Initialize();
     
     // Get system pointer (owned by the vehicle, do not delete)
@@ -202,7 +204,7 @@ void ChronoSimulation::SetupTerrain() {
     );
     
     // Add moving patch and initialize
-    m_terrain->AddMovingPatch(m_vehicle->GetChassisBody(), ChVector3d(0, 0, 0), ChVector3d(4, 3, 1));
+    m_terrain->AddMovingPatch(m_vehicle->GetChassisBody(), ChVector3d(0, 0, 0), ChVector3d(5, 3, 1));
 
     double scale = m_config.terrainZ;
     double actual_height = 0.0;
@@ -233,49 +235,17 @@ void ChronoSimulation::SetupVisualization() {
     m_vis->AttachVehicle(m_vehicle.get());
 }
 
-double ChronoSimulation::GetSleepTime(bool render)
-{
-    //target is 1
-    double currentRTF = m_vehicle->GetRTF(); 
-    //std::cout << "Current RTF: " << currentRTF << std::endl;
-    if (currentRTF == 0)
-    {
-        return 0;
-    }
-
-    
-
-    double previous_sleep = render ? last_render_sleep_time : last_sleep_time;
-    double correctionFactor = 1.0/currentRTF;
-
-    double sleep_time = previous_sleep * correctionFactor;
-
-    render ? last_render_sleep_time = sleep_time : last_sleep_time = sleep_time;
-   if (render)
-    {
-        std::cout << "RTF: " << currentRTF << " Sleep Time: " << sleep_time << std::endl << "for render" << std::endl;
-    }
-    else
-    {
-        std::cout << "RTF: " << currentRTF << " Sleep Time: " << sleep_time << std::endl << "for simulation" << std::endl;
-    }
-
-    return sleep_time;
-}
 
 void ChronoSimulation::Run() {
     double render_step_size = 1.0 / m_config.targetFps;
     double last_render_time = 0.0;
-    this->last_sleep_time = m_config.stepSize;
-    this->last_render_sleep_time = m_config.stepSize;
-    std::cout << "Sleep Time: " << last_sleep_time << std::endl;
-    std::cout << "Render Sleep Time: " << last_render_sleep_time << std::endl;
-    ChRealtimeStepTimer timer;
-    
+
+    ChRealtimeStepTimer realtime_timer;
     while (m_vis->Run()) {
+        // Capture the start time of this iteration
+
         double time = m_system->GetChTime();
 
-        double sleep_time = 0;
         // Get driver inputs
         DriverInputs driver_inputs = m_driver->GetInputs();
 
@@ -286,26 +256,25 @@ void ChronoSimulation::Run() {
 
         // Render the scene at the specified FPS
         if (time - last_render_time >= render_step_size) {
-            //std::cout << "RTF: " << m_vehicle->GetRTF() << std::endl;
+
             m_vis->BeginScene();
             m_vis->Render();
             m_vis->EndScene();
             last_render_time = time;
+
+
+            // Adjust next_step_time to account for rende
         }
+
         // Advance simulation
         m_driver->Advance(m_config.stepSize);
         m_terrain->Advance(m_config.stepSize);
         m_vehicle->Advance(m_config.stepSize);
         m_vis->Advance(m_config.stepSize);
-        timer.Spin(m_config.stepSize);
 
-        //sleep for the given amount of time
-        std::this_thread::sleep_for(std::chrono::duration<double>(sleep_time));
-
-        
+        realtime_timer.Spin(m_config.stepSize);
     }
 }
-
 int main(int argc, char* argv[]) {
     // Create simulation with default configuration
     ChronoSimulation::Config config;
