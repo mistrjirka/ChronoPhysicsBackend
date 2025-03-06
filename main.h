@@ -91,6 +91,10 @@ public:
     void SetConfig(const Config& config) { m_config = config; }
     const Config& GetConfig() const { return m_config; }
 
+    // Add RTF monitoring methods
+    double GetRTF() const { return m_vehicle ? m_vehicle->GetRTF() : 0.0; }
+    double GetStepRTF() const { return m_vehicle ? m_vehicle->GetStepRTF() : 0.0; }
+
 private:
     Config m_config;
     
@@ -100,12 +104,19 @@ private:
     std::shared_ptr<chrono::vehicle::SCMTerrain> m_terrain;
     std::shared_ptr<chrono::vehicle::ChWheeledVehicleVisualSystemIrrlicht> m_vis;
     std::shared_ptr<MyDriver> m_driver;
+    double last_sleep_time;
+    double last_render_sleep_time;
     
     // Helper methods
     void SetupVehicle();
     void SetupTerrain();
     void SetupVisualization();
     double GetScale();
+    double GetSleepTime(bool render);
+
+    // Add RTF monitoring variables
+    double m_targetRTF;
+    void UpdateTimestep();
 };
 
 #endif
