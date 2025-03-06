@@ -41,7 +41,7 @@ ChronoSimulation::Config::Config() :
     renderStepSize(1.0 / 100),
     renderWireframe(false),
     driverDelay(0.5),
-    initLoc(ChVector3d(-140, 0, 5.0)),
+    initLoc(ChVector3d(27.739,-31.1, 5.0)),
     initRot(ChQuaternion<>(1, 0, 0, 0)),
     useTerrainMesh(true),
     patchSize(ChVector2d(40.0, 40.0)),
@@ -59,15 +59,23 @@ ChronoSimulation::Config::Config() :
     soilJanosi(0.01),
     soilStiffness(2e8),
     soilDamping(3e4),
-    corner(ChVector2d(2500, -7500))
+    corner(ChVector2d(2500, -7500)),
+    unrealZOfsset(1.45f)
 {}
 
 // ChronoSimulation implementation
-ChronoSimulation::ChronoSimulation(const Config& config) : m_config(config), m_system(nullptr) {
+ChronoSimulation::ChronoSimulation(const Config& config) : m_config(config), m_system(nullptr), m_tcp_server(17863) {
 }
 
 void ChronoSimulation::Initialize() {
     // Setup the vehicle
+
+    m_terrain_coords = std::make_shared<TerrainSystemCoordinates>(
+        m_config.terrainHeight,
+        m_config.terrainWidth, 
+        m_config.unrealZOfsset,
+        m_config.corner);
+
     SetupVehicle();
     
     // Setup terrain
@@ -96,12 +104,7 @@ void ChronoSimulation::SetupSensors() {
 
 void ChronoSimulation::SetupVehicle() {
     // Determine initial location based on patch type
-    ChVector3d init_loc = m_config.initLoc;
-    if (m_config.patchType == PatchType::FLAT) {
-        init_loc = ChVector3d(5.0, 2.0, 0.6);
-    } else if (m_config.patchType == PatchType::MESH) {
-        init_loc = ChVector3d(-12.0, -12.0, 1.6);
-    }
+    ChVector3d init_loc = m_terrain_coords->convertRosToChrono(m_config.initLoc);
     
     // Create the vehicle
     m_vehicle = std::make_shared<Generic_Vehicle>(
@@ -175,6 +178,11 @@ double ChronoSimulation::GetScale() {
     const auto &vertices = mesh->GetCoordsVertices();
 
     min_z = std::numeric_limits<double>::max();
+   /* m_terrain_coords = std::make_shared<TerrainSystemCoordinates>(
+        m_config.terrainHeight,
+        m_config.terrainWidth, 
+        m_config.unrealZOfsset+min_z,
+        m_config.corner);*/
     max_z = std::numeric_limits<double>::lowest();
 
     for (const auto &v : vertices)
@@ -229,11 +237,6 @@ void ChronoSimulation::SetupTerrain() {
     m_terrain->GetMesh()->SetTexture(vehicle::GetDataFile("../data/data/vehicle/terrain/textures/grass.jpg"), 200, 200);
     m_terrain->GetMesh()->SetWireframe(m_config.renderWireframe);
 
-    m_terrain_coords = std::make_shared<TerrainSystemCoordinates>(
-        m_config.terrainWidth, 
-        m_config.terrainHeight,
-        m_config.terrainZ,
-        m_config.corner);
 }
 
 void ChronoSimulation::SetupVisualization() {
@@ -285,6 +288,9 @@ void ChronoSimulation::Run() {
         m_vehicle->Advance(m_config.stepSize);
         m_vis->Advance(m_config.stepSize);
         m_sensors->Update(time);
+        ChVector3d vehicle_pos = m_vehicle->GetChassisBody()->GetPos();
+        ChQuaternion<> vehicle_rot = m_vehicle->GetChassisBody()->GetRot();
+        m_tcp_server.updatePositionOfUnit(123, vehicle_pos, vehicle_rot, *m_terrain_coords);
 
         realtime_timer.Spin(m_config.stepSize);
     }

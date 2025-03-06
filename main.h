@@ -24,6 +24,8 @@
 #include "physical_sensors.hpp"
 #include "terrain_system.hpp"
 
+#include "TcpPositionServer.hpp"
+
 // Driver class for controlling the vehicle
 class MyDriver : public chrono::vehicle::ChDriver {
 public:
@@ -77,6 +79,7 @@ public:
         double soilJanosi;    // Janosi shear coefficient (m)
         double soilStiffness; // Elastic stiffness (Pa/m)
         double soilDamping;   // Damping (Pa s/m)
+        double unrealZOfsset;
         
         // Default constructor declaration (defined in .cpp)
         Config();
@@ -110,16 +113,19 @@ private:
     std::shared_ptr<TerrainSystemCoordinates> m_terrain_coords;
     std::shared_ptr<PhysicalSensors> m_sensors;
     std::shared_ptr<ROSDriver> m_driver;
+    TcpPositionServer m_tcp_server;
     double last_sleep_time;
     double last_render_sleep_time;
+    double min_z;
+    double z_scale;
     
     // Helper methods
     void SetupVehicle();
     void SetupTerrain();
     void SetupVisualization();
     void SetupSensors();
-    
-    double GetScale();
+
+    void GetScale();
     double GetSleepTime(bool render);
 
     // Add RTF monitoring variables

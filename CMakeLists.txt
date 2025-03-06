@@ -97,7 +97,7 @@ endif()
 # 3. Specify project sources and add executable
 #--------------------------------------------------------------
 
-set(MY_FILES main.cpp simulation_launcher.cpp ros_bridge_driver.hpp ros_bridge.cpp physical_sensors.hpp physical_sensors.cpp terrain_system.hpp )
+set(MY_FILES main.cpp simulation_launcher.cpp ros_bridge_driver.hpp ros_bridge.cpp physical_sensors.hpp physical_sensors.cpp terrain_system.hpp TcpPositionServer.cpp)
 
 add_executable(main ${MY_FILES})
 
