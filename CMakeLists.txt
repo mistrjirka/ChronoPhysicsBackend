@@ -1,24 +1,74 @@
-cmake_minimum_required(VERSION 3.15)
-cmake_policy(SET CMP0167 NEW)
+#--------------------------------------------------------------
+# CMake configuration script for linking an external project to
+# Chrono libraries.
+# For a particular user project, modify sections 1 - 4 below,
+# as appropriate.
+#--------------------------------------------------------------
+ 
+cmake_minimum_required(VERSION 3.18)
+cmake_policy(SET CMP0091 NEW)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+#--------------------------------------------------------------
+# 1. Set the project name
+#--------------------------------------------------------------
 
-#--------------------------------------------------------------
-# Set the project name
-#--------------------------------------------------------------
 project(my_project)
 
-# Set the build type (Debug or Release)
-set(CMAKE_BUILD_TYPE Debug) # Or Release
-set(CMAKE_CXX_FLAGS_DEBUG "-g") # Add debug flags
-set(CMAKE_CXX_FLAGS_RELEASE "-O2") # Add optimization flags for release
-
-include_directories(${CHRONO_INCLUDE_DIRS} /usr/include/bullet)
-
 #--------------------------------------------------------------
-# Find the Chrono package and any required or optional modules
+# 2. Find REQUIRED and OPTIONAL Chrono modules
+#
+# Invoke the find_package function in CONFIG mode:
+#    find_package(Chrono
+#                 COMPONENTS req_module1 req_module1 ...
+#                 OPTIONAL_COMPONENTS opt_module1 opt_module2 ...
+#                 CONFIG)
+# The following Chrono modules can be requested (case insensitive):
+#   Cascade, CSharp, FMI, FSI, GPU, Irrlicht, OpenGL, VSG, Matlab,
+#   Modal, Multicore, PardisoMKL, Parsers, Postprocess, Sensor,
+#   Synchrono, Vehicle, VehicleCosim.
+# A component can be requested either as required or optional
+# (see the CMake documentation for find_package).
+# 
+# Note that you will have to set the variable Chrono_DIR to 
+# specify the location of the chrono-config.cmake script, if
+# it is not in a default install location. Chrono_DIR can point
+# to either a Chrono build tree or a Chrono install tree.
+# 
+# The following variables are set and can be used further down:
+# Chrono_FOUND
+#       set to true if Chrono and all required components were found
+# CHRONO_STATIC
+#       set to ON if Chrono has been built as static library, OFF if shared library
+# CHRONO_TARGETS
+#       list of exported Chrono targets
+# CHRONO_DLL_NAMES
+#       list of Chrono DLLs (without path)
+# CHRONO_DEPENDENCY_DLLS
+#       list of Chrono dependency DLLs (with full path)
+# CHRONO_CSHARP_SOURCES
+#       list of all SWIG-generated C# scripts corresponding to the requested components
+#       (currently, only the core, postprocess, Irrlicht, and Vehicle Chrono modules are wrapped for C#)
+# CHRONO_DATA_DIR
+#       path to the Chrono data directory
+# CHRONO_VEHICLE_DATA_DIR
+#       path to the Chrono::Vehicle data directory
+# CHRONO_FSI_DATA_DIR
+#       path to the Chrono::FSI data directory
+# SYNCHRONO_DATA_DIR
+#       path to the Chrono::Synchrono data directory
+#
+# In addition, for each requested component [COMPONENT], the following variable
+# is set to true (ON) or false (OFF):
+# CHRONO_[COMPONENT]_FOUND
+# 
+# In this example, we only request the Irrlicht module (required)
+# and, for demonstration purposes, the PardisoMKL module (optional)
 #--------------------------------------------------------------
-LIST(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/../Chrono/lib")
+
 find_package(Chrono
-             COMPONENTS Irrlicht Vehicle PostProcess
+             COMPONENTS Irrlicht Vehicle 
+             OPTIONAL_COMPONENTS PardisoMKL
              CONFIG)
 
 # Return now if Chrono or a required component was not found.
@@ -28,62 +78,45 @@ if (NOT Chrono_FOUND)
 endif()
 
 #--------------------------------------------------------------
-# Set the C++ standard to match Chrono's
+# Enable creation of "application bundles" on MacOSX.
 #--------------------------------------------------------------
-set(CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD ${CHRONO_CXX_STANDARD})
 
-#--------------------------------------------------------------
-# Add path to Chrono headers and other required directories
-#--------------------------------------------------------------
-include_directories(${CHRONO_INCLUDE_DIRS})
+# This is necessary for any Irrlicht-based project (like the example here).
+# For OpenGL-based or non-graphics projects, this is optional and the block
+# below can be removed (or else explcitly set CMAKE_MACOSX_BUNDLE to 'OFF').
+# If creating application bundles, the build output will be named 'myexe.app'.
+# Use the convenience script 'run_app.sh' available under 'contrib/appbundle-macosx/'
+# to run:
+#     start_demo.sh myexe.app
 
-# Find required packages
-find_package(nlohmann_json 3.2.0 REQUIRED)
-
-# Add WebSocket++ (header-only library)
-# You might need to adjust the path based on your system
-include_directories(/usr/include) # Make sure WebSocket++ headers are found
-
-# Find Boost - required by WebSocket++
-find_package(Boost REQUIRED COMPONENTS system thread)
-
-# Add WebSocketpp specific defines
-add_definitions(-DASIO_STANDALONE)
-add_definitions(-D_WEBSOCKETPP_CPP11_INTERNAL_)
-
-# Add include directories
-include_directories(
-    ${CHRONO_INCLUDE_DIRS}
-    /usr/include/bullet
-    ${Boost_INCLUDE_DIRS}
-)
-
-# Find Boost - required by WebSocket++
-find_package(Boost REQUIRED COMPONENTS system thread)
+if(APPLE)
+    set(CMAKE_MACOSX_BUNDLE ON)
+endif()
 
 #--------------------------------------------------------------
-# Separate source files that contain implementations
-set(SOURCES
-    main.cpp
-)
+# 3. Specify project sources and add executable
+#--------------------------------------------------------------
 
-# Create the executable with only the source files
-add_executable(main ${SOURCES})
+set(MY_FILES main.cpp simulation_launcher.cpp)
 
-# Set properties for your executable target
-target_compile_definitions(main PUBLIC "CHRONO_DATA_DIR=\"${CHRONO_DATA_DIR}\"") 
-target_compile_options(main PUBLIC ${CHRONO_CXX_FLAGS})
-target_link_options(main PUBLIC ${CHRONO_LINKER_FLAGS})
+add_executable(main ${MY_FILES})
 
-# Link to Chrono libraries and dependency libraries
-target_link_libraries(main 
-    ${CHRONO_LIBRARIES} 
-    /usr/lib/libGL.so 
-    nlohmann_json::nlohmann_json 
-    Boost::system 
-    Boost::thread
-)
+#--------------------------------------------------------------
+# Set properties for the executable target
+#--------------------------------------------------------------
 
-# Optionally, install the executable (for packaged projects)
-install(TARGETS main DESTINATION bin)
+# Here, we define a macro CHRONO_DATA_DIR which will contain the
+# path to the Chrono data directory, either in its source tree
+# (if using a build version of Chrono), or in its install tree
+# (if using an installed version of Chrono).
+target_compile_definitions(ChronoBackend PRIVATE "CHRONO_DATA_DIR=\"${CHRONO_DATA_DIR}\"") 
+
+if(MSVC)
+    set_target_properties(ChronoBackend PROPERTIES MSVC_RUNTIME_LIBRARY ${CHRONO_MSVC_RUNTIME_LIBRARY})
+endif()
+
+#--------------------------------------------------------------
+# Link to Chrono targets for the requested modules
+#--------------------------------------------------------------
+
+target_link_libraries(ChronoBackend PRIVATE ${CHRONO_TARGETS})
