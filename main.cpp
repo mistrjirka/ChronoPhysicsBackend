@@ -41,7 +41,7 @@ ChronoSimulation::Config::Config() :
     renderStepSize(1.0 / 100),
     renderWireframe(false),
     driverDelay(0.5),
-    initLoc(ChVector3d(27.739,-31.1, 5.0)),
+    initLoc(ChVector3d(277.39,-31.1, 5.0)),
     initRot(ChQuaternion<>(1, 0, 0, 0)),
     useTerrainMesh(true),
     patchSize(ChVector2d(40.0, 40.0)),
@@ -60,7 +60,7 @@ ChronoSimulation::Config::Config() :
     soilStiffness(2e8),
     soilDamping(3e4),
     corner(ChVector2d(2500, -7500)),
-    unrealZOfsset(1.45f)
+    unrealZOfsset(2.75f)
 {}
 
 // ChronoSimulation implementation
@@ -104,7 +104,7 @@ void ChronoSimulation::SetupSensors() {
 
 void ChronoSimulation::SetupVehicle() {
     // Determine initial location based on patch type
-    ChVector3d init_loc = m_terrain_coords->convertRosToChrono(m_config.initLoc);
+    ChVector3d init_loc = m_terrain_coords->convertRosToChrono(m_config.initLoc); // ChVector3d(100,0,5); //
     
     // Create the vehicle
     m_vehicle = std::make_shared<Generic_Vehicle>(
@@ -143,7 +143,7 @@ void ChronoSimulation::SetupVehicle() {
     m_vehicle->InitializeTire(tire_RR, m_vehicle->GetAxle(1)->m_wheels[RIGHT], VisualizationType::NONE);
 }
 
-double ChronoSimulation::GetScale() {
+void ChronoSimulation::GetScale() {
     double scale = m_config.terrainZ;
     double actual_height = 0.0;
     double tolerance = 0.01; // 1 cm tolerance
@@ -193,17 +193,21 @@ double ChronoSimulation::GetScale() {
             max_z = v.z();
     }
 
-
+    z_min_offset = min_z;
+    m_terrain_coords->update(m_config.terrainHeight, m_config.terrainWidth, m_config.unrealZOfsset + min_z, m_config.corner);
     actual_height = max_z - min_z;
 
 
     double scaling_factor = m_config.terrainZ / actual_height;
     scale *= scaling_factor;
-    return scale;
+    z_scale = scale;
+    std::cout << "Z Scale: " << z_scale << std::endl;
+    std::cout << "minz: " << z_min_offset << std::endl;
 }
 
 void ChronoSimulation::SetupTerrain() {
     // Create terrain
+    GetScale();
     m_terrain = std::make_shared<SCMTerrain>(m_vehicle->GetSystem());
     
     // Set soil parameters
@@ -228,13 +232,14 @@ void ChronoSimulation::SetupTerrain() {
         m_config.heightmapFile, 
         m_config.terrainHeight, 
         m_config.terrainWidth, 
-        m_config.terrainZ, 
-        GetScale(), 
+        0, 
+        z_scale, 
         m_config.terrainDelta
     );
     
     // Set terrain appearance
-    m_terrain->GetMesh()->SetTexture(vehicle::GetDataFile("../data/data/vehicle/terrain/textures/grass.jpg"), 200, 200);
+    m_terrain->GetMesh()->SetTexture("../mapchrono.png", 1, -1);
+
     m_terrain->GetMesh()->SetWireframe(m_config.renderWireframe);
 
 }
@@ -295,24 +300,92 @@ void ChronoSimulation::Run() {
         realtime_timer.Spin(m_config.stepSize);
     }
 }
+
+// Add this helper function at the top level, before main()
+void printUsage() {
+    std::cout << "Usage: ./main [options]\n"
+              << "Options:\n"
+              << "  --pos x y z    : Set initial position (default: 277.39 -31.1 5.0)\n"
+              << "  --rot x y z    : Set initial rotation in degrees (default: 0 0 0)\n";
+}
+
+// Add this helper function to convert degrees to radians
+double degToRad(double deg) {
+    return deg * CH_PI / 180.0;
+}
+
+// Add this helper function to convert Euler angles to quaternion
+ChQuaternion<> eulerToQuaternion(double roll, double pitch, double yaw) {
+    // Convert degrees to radians
+    roll = degToRad(roll);
+    pitch = degToRad(pitch);
+    yaw = degToRad(yaw);
+    
+    // Create quaternion and set it using sequential rotations
+    ChQuaternion<> q(1, 0, 0, 0);
+    ChQuaternion<> qZ;
+    ChQuaternion<> qY;
+    ChQuaternion<> qX;
+    
+    qZ.SetFromAngleZ(yaw);
+    qY.SetFromAngleY(pitch);
+    qX.SetFromAngleX(roll);
+    
+    // Combine rotations: first roll (X), then pitch (Y), then yaw (Z)
+    q = qZ * qY * qX;
+    return q;
+}
+
 int main(int argc, char* argv[]) {
-    // Create simulation with default configuration
     ChronoSimulation::Config config;
     
-    // Customize configuration if needed
-    // config.patchType = ChronoSimulation::PatchType::FLAT;
-    // config.heightmapFile = "../custom_heightmap.bmp";
-    // config.driverDelay = 1.0;
+    // Parse command line arguments
+    for (int i = 1; i < argc; i++) {
+        std::string arg = argv[i];
+        
+        if (arg == "--pos" && i + 3 < argc) {
+            try {
+                double x = std::stod(argv[i + 1]);
+                double y = std::stod(argv[i + 2]);
+                double z = std::stod(argv[i + 3]);
+                config.initLoc = ChVector3d(x, y, z);
+                i += 3;
+            } catch (const std::exception& e) {
+                std::cerr << "Error parsing position arguments\n";
+                printUsage();
+                return 1;
+            }
+        }
+        else if (arg == "--rot" && i + 3 < argc) {
+            try {
+                double roll = std::stod(argv[i + 1]);
+                double pitch = std::stod(argv[i + 2]);
+                double yaw = std::stod(argv[i + 3]);
+                config.initRot = eulerToQuaternion(roll, pitch, yaw);
+                i += 3;
+            } catch (const std::exception& e) {
+                std::cerr << "Error parsing rotation arguments\n";
+                printUsage();
+                return 1;
+            }
+        }
+        else if (arg == "--help" || arg == "-h") {
+            printUsage();
+            return 0;
+        }
+    }
     
-    // Launch the simulation in a new thread
+    // Print initial configuration
+    std::cout << "Starting simulation with:\n"
+              << "Position: " << config.initLoc.x() << " " 
+              << config.initLoc.y() << " " 
+              << config.initLoc.z() << "\n"
+              << "Rotation (quaternion): " << config.initRot << std::endl;
+    
+    // Launch simulation
     SimulationLauncher launcher(config);
     launcher.Launch();
-
-    // Do other things in the main thread
-    // ...
-
-    // Wait for the simulation thread to finish
     launcher.Join();
-
+    
     return 0;
 }

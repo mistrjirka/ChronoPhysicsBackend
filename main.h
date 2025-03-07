@@ -116,7 +116,7 @@ private:
     TcpPositionServer m_tcp_server;
     double last_sleep_time;
     double last_render_sleep_time;
-    double min_z;
+    double z_min_offset;
     double z_scale;
     
     // Helper methods

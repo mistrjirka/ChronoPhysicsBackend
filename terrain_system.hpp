@@ -29,6 +29,14 @@ public:
         this->z_offset = z_offset;
     };
 
+    void update(double sizeX, double sizeY, double z_offset, ChVector2d bottom_right)
+    {
+        this->sizeX = sizeX;
+        this->sizeY = sizeY;
+        this->bottom_right = bottom_right;
+        this->z_offset = z_offset;
+    }
+
     ChVector3d convertUEToChrono(ChVector3d point)
     {
         double x = (point.x() - bottom_right.x()) / 100 - sizeX / 2;
