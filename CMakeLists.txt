@@ -71,10 +71,31 @@ find_package(Chrono
              OPTIONAL_COMPONENTS PardisoMKL
              CONFIG)
 
+# Find Eigen library
+find_package(Eigen3 REQUIRED)
+
+# Locate Irrlicht library manually
+find_library(IRRLICHT_LIBRARY NAMES Irrlicht PATHS /usr/lib)
+find_path(IRRLICHT_INCLUDE_DIR NAMES irrlicht.h PATHS /usr/include/irrlicht/)
+
 # Return now if Chrono or a required component was not found.
 if (NOT Chrono_FOUND)
   message("Could not find Chrono or one of its required modules")
   return()
+endif()
+
+#eigen
+if(NOT Eigen3_FOUND)
+    message(FATAL_ERROR "Eigen3 not found. Please install it.")
+endif()
+
+#irrlicht
+#if(NOT Irrlicht_FOUND)
+#    message(FATAL_ERROR "Irrlicht not found. Please install it.")
+#endif()
+
+if (NOT IRRLICHT_LIBRARY OR NOT IRRLICHT_INCLUDE_DIR)
+    message(FATAL_ERROR "Irrlicht not found. Please specify the correct path.")
 endif()
 
 #--------------------------------------------------------------
@@ -119,4 +140,7 @@ endif()
 # Link to Chrono targets for the requested modules
 #--------------------------------------------------------------
 
-target_link_libraries(main PRIVATE ${CHRONO_TARGETS})
+target_link_libraries(main PRIVATE ${CHRONO_TARGETS} Eigen3::Eigen ${IRRLICHT_LIBRARY})
+
+# Include directories
+include_directories(${IRRLICHT_INCLUDE_DIR})
