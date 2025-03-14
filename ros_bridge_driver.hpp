@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 
 #include "chrono_vehicle/wheeled_vehicle/vehicle/WheeledVehicle.h"
 #include "chrono_vehicle/wheeled_vehicle/ChWheeledVehicle.h"
@@ -157,7 +158,8 @@ public:
         while (heading_error > CH_PI) heading_error -= 2 * CH_PI;
         while (heading_error < -CH_PI) heading_error += 2 * CH_PI;
         
-        m_steering = steering_controller.update(heading_error, m_step_size);
+        m_steering = std::min(std::max(-max_steering_, target_angular_vel_), max_steering_);
+        //steering_controller.update(heading_error, m_step_size);
 
         // Debug output
         if (time - last_debug_time_ >= 1.0) {

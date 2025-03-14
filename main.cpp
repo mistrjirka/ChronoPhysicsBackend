@@ -60,7 +60,7 @@ ChronoSimulation::Config::Config() :
     soilStiffness(2e8),
     soilDamping(3e4),
     corner(ChVector2d(2500, -7500)),
-    unrealZOfsset(2.75f)
+    unrealZOfsset(1.3f)
 {}
 
 // ChronoSimulation implementation
@@ -86,7 +86,7 @@ void ChronoSimulation::Initialize() {
     SetupVisualization();
     
     // Create driver
-    m_driver = std::make_shared<ROSDriver>(*m_vehicle);
+    m_driver = std::make_shared<ROSDriver>(*m_vehicle,20,.95);
     m_driver->Initialize();
     
     // Get system pointer (owned by the vehicle, do not delete)
@@ -306,7 +306,8 @@ void printUsage() {
     std::cout << "Usage: ./main [options]\n"
               << "Options:\n"
               << "  --pos x y z    : Set initial position (default: 277.39 -31.1 5.0)\n"
-              << "  --rot x y z    : Set initial rotation in degrees (default: 0 0 0)\n";
+              << "  --rot x y z    : Set initial rotation in degrees (default: 0 0 0)\n"
+              << "  --z-offset val : Set unreal Z offset (default: 2.3)\n";
 }
 
 // Add this helper function to convert degrees to radians
@@ -369,6 +370,18 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
         }
+        else if (arg == "--z-offset" && i + 1 < argc) {
+            try {
+                float zOffset = std::stof(argv[i + 1]);
+                config.unrealZOfsset = zOffset;
+                i += 1;
+                std::cout << "Setting Unreal Z offset to: " << zOffset << std::endl;
+            } catch (const std::exception& e) {
+                std::cerr << "Error parsing Z offset argument\n";
+                printUsage();
+                return 1;
+            }
+        }
         else if (arg == "--help" || arg == "-h") {
             printUsage();
             return 0;
@@ -380,7 +393,8 @@ int main(int argc, char* argv[]) {
               << "Position: " << config.initLoc.x() << " " 
               << config.initLoc.y() << " " 
               << config.initLoc.z() << "\n"
-              << "Rotation (quaternion): " << config.initRot << std::endl;
+              << "Rotation (quaternion): " << config.initRot << "\n"
+              << "Unreal Z offset: " << config.unrealZOfsset << std::endl;
     
     // Launch simulation
     SimulationLauncher launcher(config);

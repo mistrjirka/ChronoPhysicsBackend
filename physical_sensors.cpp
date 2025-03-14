@@ -121,7 +121,7 @@ void PhysicalSensors::PublishOdometry(double time) {
     // Create odometry message with explicit double type specification
     json odom_msg = {
         {"header", {
-            {"frame_id", "odom"},
+            {"frame_id", "ouster"},  // Changed from "odom" to "ouster"
             {"stamp", {
                 {"sec", (int)time},
                 {"nanosec", (int)((time - (int)time) * 1e9)}
@@ -191,7 +191,7 @@ void PhysicalSensors::PublishIMU(double time) {
     // Ensure all values are valid doubles
     json imu_msg = {
         {"header", {
-            {"frame_id", "imu_link"},
+            {"frame_id", "ouster"},  // Changed from "imu_link" to "ouster"
             {"stamp", {
                 {"sec", (int)time},
                 {"nanosec", (int)((time - (int)time) * 1e9)}
