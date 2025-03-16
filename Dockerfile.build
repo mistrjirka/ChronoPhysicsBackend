@@ -1,0 +1,101 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install build dependencies (excluding libglfw3-dev and libglew-dev)
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    libeigen3-dev \
+    libboost-dev \
+    libboost-filesystem-dev \
+    libboost-system-dev \
+    libirrlicht-dev \
+    libboost-thread-dev \
+    libboost-program-options-dev \
+    libboost-iostreams-dev \
+    libglm-dev \
+    libjsoncpp-dev \
+    unzip \
+    zip \
+    libxxf86vm-dev \
+    x11proto-core-dev \
+    libxrandr-dev \
+    libxi-dev \
+    libxinerama-dev \
+    libxcursor-dev \
+    libgl1-mesa-dev \
+    libglu1-mesa-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libbz2-dev \
+    freeglut3-dev \
+    libasio-dev \
+    openmpi-bin \
+    openmpi-common \
+    libopenmpi-dev \
+    nlohmann-json3-dev \
+    libx11-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Build and install GLFW as static
+WORKDIR /tmp
+RUN wget https://github.com/glfw/glfw/releases/download/3.3.8/glfw-3.3.8.zip \
+    && unzip glfw-3.3.8.zip \
+    && cd glfw-3.3.8 \
+    && mkdir build && cd build \
+    && cmake -DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF .. \
+    && make -j$(nproc) \
+    && make install \
+    && cd /tmp && rm -rf glfw-3.3.8*
+
+# Build and install GLEW as static
+RUN wget https://downloads.sourceforge.net/project/glew/glew/2.1.0/glew-2.1.0.zip \
+    && unzip glew-2.1.0.zip \
+    && cd glew-2.1.0 \
+    && make -j$(nproc) \
+    && make install GLEW_DEST=/usr/local \
+    && cd /tmp && rm -rf glew-2.1.0*
+
+# Install static Irrlicht
+# Install websocketpp
+RUN git clone https://github.com/zaphoyd/websocketpp.git /tmp/websocketpp \
+    && cd /tmp/websocketpp \
+    && mkdir build && cd build \
+    && cmake .. \
+    && make -j$(nproc) \
+    && make install \
+    && cd / && rm -rf /tmp/websocketpp
+
+# Build static Project Chrono
+WORKDIR /opt
+RUN git clone https://github.com/projectchrono/chrono.git
+WORKDIR /opt/chrono
+RUN mkdir build && cd build \
+    && cmake \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCH_ENABLE_MODULE_IRRLICHT=ON \
+        -DCH_ENABLE_MODULE_VEHICLE=ON \
+        -DCH_ENABLE_MODULE_POSTPROCESS=OFF \
+        -DBoost_USE_STATIC_LIBS=ON \
+        .. \
+    && make -j$(nproc) \
+    && make install \
+    && ldconfig
+
+# Build application with static linking
+WORKDIR /app
+COPY . /app/
+
+RUN mkdir -p build_static && cd build_static \
+    && cmake .. \
+        -DChrono_DIR=/usr/local/lib/cmake/Chrono \
+        -DBoost_USE_STATIC_LIBS=ON \
+    && make -j$(nproc)
+
+CMD mkdir -p /output/build_static \
+    && cp -v /app/build_static/main /output/build_static/main \
+    && chmod +x /output/build_static/main \
+    && echo "Static binary build complete!"
