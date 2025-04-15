@@ -79,13 +79,13 @@ void TcpPositionServer::updatePositionOfUnit(int unit_id,
 
     // Convert Chrono Euler angles to UE rotation
     ChVector3d euler_angles(roll, pitch, yaw);
-    ChVector3d ue_euler_angles = terrain_system.convertChronotToROSRotation(euler_angles);
+    ChVector3d ue_euler_angles = terrain_system.convertChronoToUERotation(euler_angles);
     roll = ue_euler_angles.x();
     pitch = ue_euler_angles.y();
     yaw = ue_euler_angles.z();
 
     // Prepare the twist data
-    ChVector3d terrain_coordinates = terrain_system.convertChronoToROS(position);
+    ChVector3d terrain_coordinates = terrain_system.convertChronoToUE(position);
 
     TwistSendable_t twistData;
     twistData.x = static_cast<float>(terrain_coordinates.x());

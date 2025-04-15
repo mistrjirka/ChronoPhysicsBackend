@@ -1,0 +1,28 @@
+Capturing library versions for build/main...
+linux-vdso.so.1: Not found in pacman or ldconfig
+libChrono_vehicle_irrlicht.so: Not found in pacman or ldconfig
+libChronoModels_vehicle.so: Not found in pacman or ldconfig
+libChrono_vehicle.so: Not found in pacman or ldconfig
+libChrono_irrlicht.so: Not found in pacman or ldconfig
+libChronoModels_robot.so: Not found in pacman or ldconfig
+libChrono_core.so: Not found in pacman or ldconfig
+libIrrlicht.so.1.8 (_ZN3irr5video11CNullDriver12printVersionEv)
+libgomp.so.1 (Library too old for offload (version %u < %u))
+libstdc++.so.6 (_ZNSt6chrono14remote_versionB5cxx11Ev)
+libm.so.6 (_LIB_VERSION)
+libgcc_s.so.1 (X86_TUNE_INTER_UNIT_CONVERSIONS)
+libc.so.6 (versionsort64)
+/lib64/ld-linux-x86-64.so.2: Not found in pacman or ldconfig
+libGL.so.1 (glXQueryVersion)
+libXxf86vm.so.1 (XF86VidModeSetClientVersion)
+libz.so.1 (zlibVersion)
+libjpeg.so.8 (libjpeg-turbo version 3.1.0 (build 20241225))
+libpng16.so.16 (png_get_header_version)
+libbz2.so.1.0 (BZ2_bzlibVersion)
+libGLdispatch.so.0 (__glDispatchGetABIVersion)
+libGLX.so.0 (glXQueryVersion)
+libX11.so.6 (XProtocolVersion)
+libXext.so.6 (XGEQueryVersion)
+libxcb.so.1 (xcb_xc_misc_get_version)
+libXau.so.6 (.gnu.version)
+libXdmcp.so.6 (.gnu.version)

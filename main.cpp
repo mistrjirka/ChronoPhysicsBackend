@@ -60,7 +60,7 @@ ChronoSimulation::Config::Config() :
     soilStiffness(2e8),
     soilDamping(3e4),
     corner(ChVector2d(2500, -7500)),
-    unrealZOfsset(1.3f)
+    unrealZOfsset(2.3f)
 {}
 
 // ChronoSimulation implementation

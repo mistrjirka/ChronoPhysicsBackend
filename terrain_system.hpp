@@ -74,9 +74,11 @@ public:
 
     ChVector3d convertChronoToUE(ChVector3d point)
     {
+        //std::cout << "Converting Chrono to UE: " << point.x() << " " << point.y() << " " << point.z() << std::endl;
         double x = (point.x() + sizeX / 2) * 100 + bottom_right.x();
         double y = bottom_right.y() - (point.y() - sizeY / 2) * 100;
         double z = (point.z() - z_offset) * 100;
+        //std::cout << "Converted Result: " << x << " " << y << " " << z << std::endl;
         return ChVector3d(x, y, z);
     }
 
@@ -100,9 +102,11 @@ public:
 
     ChVector3d convertChronoToUERotation(ChVector3d point)
     {
-        double x = point.y();
-        double y = point.x();
-        double z = point.z();
+        //std::cout << "Converting Chrono to UE Rotation: " << point.x() << " " << point.y() << " " << point.z() << std::endl;
+        double x = point.x();
+        double y = -point.y();
+        double z = -point.z();
+        //std::cout << "Converted Result: " << x << " " << y << " " << z << std::endl;
         return ChVector3d(x, y, z);
     }
 
