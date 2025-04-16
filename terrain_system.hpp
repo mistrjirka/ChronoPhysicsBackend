@@ -95,8 +95,8 @@ public:
     {
         ChVector3d new_rotation = convertChronoToUERotation(point);
         double x = new_rotation.x();
-        double y = new_rotation.z();
-        double z = -new_rotation.y();
+        double y = -new_rotation.y();
+        double z = new_rotation.z();
         return ChVector3d(x, y, z);
     }
 
