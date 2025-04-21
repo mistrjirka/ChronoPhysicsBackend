@@ -2,6 +2,7 @@ CMakeFiles/main.dir/physical_sensors.cpp.o: \
  /home/jirka/programovani/ChronoPhysicsBackend/physical_sensors.cpp \
  /usr/include/stdc-predef.h \
  /home/jirka/programovani/ChronoPhysicsBackend/physical_sensors.hpp \
+ /home/jirka/programovani/ChronoPhysicsBackend/PreHACDFix.hpp \
  /usr/local/include/chrono_vehicle/ChVehicle.h \
  /usr/include/c++/14.2.1/numeric \
  /usr/include/c++/14.2.1/x86_64-pc-linux-gnu/bits/c++config.h \
@@ -682,7 +683,6 @@ CMakeFiles/main.dir/physical_sensors.cpp.o: \
  /usr/local/include/chrono/geometry/ChEllipsoid.h \
  /usr/local/include/chrono/collision/ChCollisionShapePath2D.h \
  /usr/local/include/chrono/collision/ChCollisionShapePoint.h \
- /usr/local/include/chrono/collision/ChCollisionShapeSegment.h \
  /usr/local/include/chrono/collision/ChCollisionShapeRoundedBox.h \
  /usr/local/include/chrono/geometry/ChRoundedBox.h \
  /usr/local/include/chrono/collision/ChCollisionShapeRoundedCylinder.h \
@@ -754,7 +754,6 @@ CMakeFiles/main.dir/physical_sensors.cpp.o: \
  /usr/local/include/chrono_thirdparty/rapidjson/stream.h \
  /usr/local/include/chrono/physics/ChLinkTSDA.h \
  /usr/local/include/chrono/solver/ChVariablesGenericDiagonalMass.h \
- /usr/local/include/chrono/utils/ChBodyGeometry.h \
  /usr/local/include/chrono_vehicle/ChVehicleOutput.h \
  /usr/local/include/chrono/physics/ChBodyAuxRef.h \
  /usr/local/include/chrono/physics/ChShaft.h \
@@ -815,6 +814,28 @@ CMakeFiles/main.dir/physical_sensors.cpp.o: \
  /usr/local/include/chrono/physics/ChLoadContainer.h \
  /usr/local/include/chrono_vehicle/ChPart.h \
  /usr/local/include/chrono/utils/ChCompositeInertia.h \
+ /usr/local/include/chrono_vehicle/ChVehicleGeometry.h \
+ /usr/local/include/chrono/utils/ChUtilsCreators.h \
+ /usr/local/include/chrono/collision/ChConvexDecomposition.h \
+ /usr/local/include/chrono/geometry/ChTriangleMeshSoup.h \
+ /usr/local/include/chrono_thirdparty/HACD/hacdHACD.h \
+ /usr/include/bullet/HACD/hacdVersion.h \
+ /usr/include/bullet/HACD/hacdVector.h /usr/include/c++/14.2.1/math.h \
+ /usr/include/bullet/HACD/hacdVector.inl \
+ /usr/include/bullet/HACD/hacdGraph.h \
+ /usr/include/bullet/HACD/hacdICHull.h \
+ /usr/include/bullet/HACD/hacdManifoldMesh.h \
+ /usr/include/bullet/HACD/hacdCircularList.h \
+ /usr/include/bullet/HACD/hacdCircularList.inl \
+ /usr/include/c++/14.2.1/set /usr/include/c++/14.2.1/bits/stl_set.h \
+ /usr/include/c++/14.2.1/bits/stl_multiset.h \
+ /usr/include/c++/14.2.1/queue /usr/include/c++/14.2.1/deque \
+ /usr/include/c++/14.2.1/bits/stl_deque.h \
+ /usr/include/c++/14.2.1/bits/deque.tcc \
+ /usr/include/c++/14.2.1/bits/stl_queue.h \
+ /usr/local/include/chrono_thirdparty/HACDv2/HACD.h \
+ /usr/local/include/chrono_thirdparty/HACDv2/PlatformConfigHACD.h \
+ /usr/local/include/chrono_thirdparty/HACDv2/PxVector.h \
  /usr/local/include/chrono_vehicle/ChVehicleJoint.h \
  /usr/local/include/chrono_thirdparty/variant/variant.hpp \
  /usr/local/include/chrono_vehicle/ChPowertrainAssembly.h \
@@ -858,10 +879,6 @@ CMakeFiles/main.dir/physical_sensors.cpp.o: \
  /usr/include/websocketpp/common/connection_hdl.hpp \
  /usr/include/websocketpp/common/functional.hpp \
  /usr/include/websocketpp/http/constants.hpp \
- /usr/include/c++/14.2.1/queue /usr/include/c++/14.2.1/deque \
- /usr/include/c++/14.2.1/bits/stl_deque.h \
- /usr/include/c++/14.2.1/bits/deque.tcc \
- /usr/include/c++/14.2.1/bits/stl_queue.h \
  /usr/include/websocketpp/impl/connection_impl.hpp \
  /usr/include/websocketpp/processors/hybi00.hpp \
  /usr/include/websocketpp/common/md5.hpp \
@@ -1465,7 +1482,9 @@ CMakeFiles/main.dir/physical_sensors.cpp.o: \
  /usr/include/c++/14.2.1/bits/fs_dir.h \
  /usr/include/c++/14.2.1/bits/fs_ops.h \
  /usr/include/nlohmann/detail/conversions/to_json.hpp \
+ /usr/include/c++/14.2.1/optional \
  /usr/include/nlohmann/detail/iterators/iteration_proxy.hpp \
+ /usr/include/nlohmann/detail/string_utils.hpp \
  /usr/include/nlohmann/byte_container_with_subtype.hpp \
  /usr/include/nlohmann/detail/hash.hpp \
  /usr/include/nlohmann/detail/input/binary_reader.hpp \

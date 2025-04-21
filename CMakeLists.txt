@@ -7,7 +7,11 @@
  
 cmake_minimum_required(VERSION 3.18)
 cmake_policy(SET CMP0091 NEW)
-set(CMAKE_CXX_STANDARD 17)
+if(DEFINED CHRONO_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD ${CHRONO_CXX_STANDARD})
+else()
+    set(CMAKE_CXX_STANDARD 17)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #--------------------------------------------------------------
 # 1. Set the project name
@@ -141,9 +145,14 @@ endif()
 #--------------------------------------------------------------
 message(STATUS "Bullet includes: ${BULLET_INCLUDE_DIRS}")
 message(STATUS "Bullet libs:     ${BULLET_LIBRARIES}")
-target_include_directories(main PRIVATE ${BULLET_INCLUDE_DIRS} ${CHRONO_THIRD_PARTY_INCLUDE_DIRS} /usr/local/include/chrono_thirdparty /usr/include/bullet/HACD)
+target_include_directories(main PRIVATE ${CHRONO_THIRD_PARTY_INCLUDE_DIRS} /usr/local/include/chrono_thirdparty /usr/include/bullet/HACD)
 
 target_link_libraries(main PRIVATE ${CHRONO_LIBRARIES} ${CHRONO_TARGETS} Eigen3::Eigen ${IRRLICHT_LIBRARY} ${BULLET_LIBRARIES} )
 
 # Include directories
 include_directories(${IRRLICHT_INCLUDE_DIR})
+include_directories(/usr/local/include/chrono_thirdparty/HACD)  # Added to locate hacdVersion.h
+
+if(MSVC)
+    add_DLL_copy_command()  # Copies Chrono and dependency DLLs to the binary output folder
+endif()

@@ -160,16 +160,19 @@ main: CMakeFiles/main.dir/physical_sensors.cpp.o
 main: CMakeFiles/main.dir/TcpPositionServer.cpp.o
 main: CMakeFiles/main.dir/build.make
 main: CMakeFiles/main.dir/compiler_depend.ts
-main: /usr/local/lib/libChrono_vehicle_irrlicht.so
-main: /usr/local/lib/libChronoModels_vehicle.so
-main: /usr/local/lib/libChrono_vehicle.so
-main: /usr/local/lib/libChrono_irrlicht.so
-main: /usr/local/lib/libChronoModels_robot.so
-main: /usr/local/lib/libChrono_core.so
-main: /usr/lib/libIrrlicht.so
-main: /usr/lib/libIrrlicht.so
 main: /usr/lib/libgomp.so
 main: /usr/lib/libpthread.a
+main: /usr/local/lib/libChronoEngine_vehicle_irrlicht.so
+main: /usr/local/lib/libChronoModels_vehicle.so
+main: /usr/local/lib/libChronoEngine_vehicle.so
+main: /usr/local/lib/libChronoEngine_irrlicht.so
+main: /usr/local/lib/libChronoModels_robot.so
+main: /usr/local/lib/libChronoEngine.so
+main: /usr/lib/libIrrlicht.so
+main: /usr/lib/libBulletDynamics.so
+main: /usr/lib/libBulletCollision.so
+main: /usr/lib/libLinearMath.so
+main: /usr/lib/libBulletSoftBody.so
 main: CMakeFiles/main.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/jirka/programovani/ChronoPhysicsBackend/build2/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable main"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/main.dir/link.txt --verbose=$(VERBOSE)

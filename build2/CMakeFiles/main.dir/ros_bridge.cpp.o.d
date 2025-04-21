@@ -878,7 +878,9 @@ CMakeFiles/main.dir/ros_bridge.cpp.o: \
  /usr/include/c++/14.2.1/bits/fs_dir.h \
  /usr/include/c++/14.2.1/bits/fs_ops.h \
  /usr/include/nlohmann/detail/conversions/to_json.hpp \
+ /usr/include/c++/14.2.1/optional \
  /usr/include/nlohmann/detail/iterators/iteration_proxy.hpp \
+ /usr/include/nlohmann/detail/string_utils.hpp \
  /usr/include/nlohmann/byte_container_with_subtype.hpp \
  /usr/include/nlohmann/detail/hash.hpp \
  /usr/include/nlohmann/detail/input/binary_reader.hpp \
