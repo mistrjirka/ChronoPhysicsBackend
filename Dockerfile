@@ -36,8 +36,13 @@ RUN rm -rf build && mkdir -p build && cd build && \
     cmake .. && \
     make -j$(nproc)
 
+# Expose port 17863 for TCPPositionServer and 9090 for ROSBridge
+EXPOSE 17863
+EXPOSE 9090
+
 # Set display for GUI
 ENV DISPLAY=:0
 
 # Default command to run your program (edit as needed)
-CMD ["./build/main"]
+WORKDIR /app/build
+CMD ["./main"]
