@@ -97,7 +97,7 @@ endif()
 if (NOT IRRLICHT_LIBRARY OR NOT IRRLICHT_INCLUDE_DIR)
     message(FATAL_ERROR "Irrlicht not found. Please specify the correct path.")
 endif()
-
+find_package(Bullet REQUIRED)
 #--------------------------------------------------------------
 # Enable creation of "application bundles" on MacOSX.
 #--------------------------------------------------------------
@@ -139,8 +139,11 @@ endif()
 #--------------------------------------------------------------
 # Link to Chrono targets for the requested modules
 #--------------------------------------------------------------
+message(STATUS "Bullet includes: ${BULLET_INCLUDE_DIRS}")
+message(STATUS "Bullet libs:     ${BULLET_LIBRARIES}")
+target_include_directories(main PRIVATE ${BULLET_INCLUDE_DIRS} ${CHRONO_THIRD_PARTY_INCLUDE_DIRS} /usr/local/include/chrono_thirdparty /usr/include/bullet/HACD)
 
-target_link_libraries(main PRIVATE ${CHRONO_TARGETS} Eigen3::Eigen ${IRRLICHT_LIBRARY})
+target_link_libraries(main PRIVATE ${CHRONO_LIBRARIES} ${CHRONO_TARGETS} Eigen3::Eigen ${IRRLICHT_LIBRARY} ${BULLET_LIBRARIES} )
 
 # Include directories
 include_directories(${IRRLICHT_INCLUDE_DIR})

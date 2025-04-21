@@ -1,16 +1,11 @@
 #!/bin/bash
 
-# Set the library path to include the local libs directory
-export LD_LIBRARY_PATH="$(pwd)/libs:$LD_LIBRARY_PATH"
+# Build the Docker image
+docker build -t myapp -f Dockerfile.build .
 
-# Path to the binary
-BINARY_PATH="build/main"
-
-# Check if the binary exists
-if [ ! -f "$BINARY_PATH" ]; then
-    echo "Error: Binary file not found at $BINARY_PATH"
-    exit 1
-fi
-
-# Run the binary
-"$BINARY_PATH" "$@"
+# Run the container with port mapping and pass arguments
+docker run -it --rm \
+  -p 17863:17863 \
+  -p 9090:9090 \
+  --network=host \
+  myapp "$@"

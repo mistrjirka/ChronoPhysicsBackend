@@ -1,3 +1,4 @@
+#include "PreHACDFix.hpp"  // Added to provide dummy declarations for HeapManager and ICHUll
 #pragma once
 
 #include "chrono_vehicle/ChVehicle.h"

@@ -1,3 +1,4 @@
+#include "PreHACDFix.hpp"
 #ifndef MAIN_H
 #define MAIN_H
 #include "chrono_vehicle/wheeled_vehicle/vehicle/WheeledVehicle.h"
@@ -57,6 +58,7 @@ public:
         chrono::ChVector3d initLoc;
         chrono::ChQuaternion<> initRot;
         bool useTerrainMesh;
+        bool useVisualization; // <-- Add this line
         
         // Terrain parameters
         chrono::ChVector2d patchSize;

@@ -44,7 +44,8 @@ ChronoSimulation::Config::Config() :
     initLoc(ChVector3d(277.39,-31.1, 5.0)),
     initRot(ChQuaternion<>(1, 0, 0, 0)),
     useTerrainMesh(true),
-    patchSize(ChVector2d(40.0, 40.0)),
+    useVisualization(true),
+    patchSize(ChVector2d(10.0, 10.0)),
     heightmapFile("../heightmap.bmp"),
     terrainHeight(300),
     terrainWidth(100),
@@ -82,8 +83,10 @@ void ChronoSimulation::Initialize() {
     SetupTerrain();
 
     SetupSensors();
-    // Setup visualization
-    SetupVisualization();
+    // Setup visualization only if enabled
+    if (m_config.useVisualization) {
+        SetupVisualization();
+    }
     
     // Create driver
     m_driver = std::make_shared<ROSDriver>(*m_vehicle,20,.95);
@@ -262,8 +265,12 @@ void ChronoSimulation::Run() {
     double last_render_time = 0.0;
 
     ChRealtimeStepTimer realtime_timer;
-    while (m_vis->Run()) {
-        // Capture the start time of this iteration
+    bool running = true;
+    while (running) {
+        // Visualization: use m_vis->Run(); Headless: run until externally stopped (or add your own break)
+        if (m_config.useVisualization) {
+            running = m_vis->Run();
+        }
 
         double time = m_system->GetChTime();
 
@@ -276,22 +283,20 @@ void ChronoSimulation::Run() {
         m_vehicle->Synchronize(time, driver_inputs, *m_terrain);
 
         // Render the scene at the specified FPS
-        if (time - last_render_time >= render_step_size) {
-
+        if (m_config.useVisualization && time - last_render_time >= render_step_size) {
             m_vis->BeginScene();
             m_vis->Render();
             m_vis->EndScene();
             last_render_time = time;
-
-
-            // Adjust next_step_time to account for rende
         }
 
         // Advance simulation
         m_driver->Advance(m_config.stepSize);
         m_terrain->Advance(m_config.stepSize);
         m_vehicle->Advance(m_config.stepSize);
-        m_vis->Advance(m_config.stepSize);
+        if (m_config.useVisualization) {
+            m_vis->Advance(m_config.stepSize);
+        }
         m_sensors->Update(time);
         ChVector3d vehicle_pos = m_vehicle->GetChassisBody()->GetPos();
         ChQuaternion<> vehicle_rot = m_vehicle->GetChassisBody()->GetRot();
@@ -307,7 +312,8 @@ void printUsage() {
               << "Options:\n"
               << "  --pos x y z    : Set initial position (default: 277.39 -31.1 5.0)\n"
               << "  --rot x y z    : Set initial rotation in degrees (default: 0 0 0)\n"
-              << "  --z-offset val : Set unreal Z offset (default: 2.3)\n";
+              << "  --z-offset val : Set unreal Z offset (default: 2.3)\n"
+              << "  --no-viz       : Run without visualization\n";
 }
 
 // Add this helper function to convert degrees to radians
@@ -381,6 +387,10 @@ int main(int argc, char* argv[]) {
                 printUsage();
                 return 1;
             }
+        }
+        else if (arg == "--no-viz") {
+            config.useVisualization = false;
+            std::cout << "Running without visualization" << std::endl;
         }
         else if (arg == "--help" || arg == "-h") {
             printUsage();
