@@ -4,34 +4,14 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies using pacman
 RUN pacman -Syu --noconfirm \
-    base-devel \
-    cmake \
-    git \
-    wget \
-    eigen \
-    boost \
-    irrlicht \
-    glm \
-    jsoncpp \
-    unzip \
-    zip \
-    libxxf86vm \
-    xorg-xrandr \
-    libxi \
-    xorg-xinerama \
-    xorg-xcursor \
-    mesa \
-    glu \
-    libpng \
-    libjpeg-turbo \
-    bzip2 \
-    freeglut \
-    asio \
-    openmpi \
-    nlohmann-json \
+    base-devel cmake git wget \
+    eigen boost irrlicht glm jsoncpp \
+    unzip zip \
+    libxxf86vm libxrandr libxi libxinerama libxcursor \
     libx11 \
-    bullet \
-    websocketpp && \
+    mesa glu \
+    libpng libjpeg-turbo bzip2 freeglut \
+    asio openmpi nlohmann-json bullet websocketpp && \
     pacman -Scc --noconfirm
 
 # Download Chrono source to a dedicated directory and build in a separate build directory
