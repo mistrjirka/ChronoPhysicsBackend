@@ -45,4 +45,4 @@ ENV DISPLAY=:0
 
 # Default command to run your program (edit as needed)
 WORKDIR /app/build
-CMD ["./main"]
+CMD ["./main", "--no-vis"]
